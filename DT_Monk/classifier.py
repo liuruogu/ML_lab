@@ -24,4 +24,7 @@ for i in range(len(m.attributes)):
     print("Info gain of the no.",i+1,"attribute in monk3:", gi)
 print("-----------------------------------------------------")
 
-# 
+#build the decision tree for the monk1 dataset and test its error rate using testing set
+t = d.buildTree(m.monk1, m.attributes)
+print(t)
+print(d.check(t, m.monk1))
