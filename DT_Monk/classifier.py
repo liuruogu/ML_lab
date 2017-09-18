@@ -1,5 +1,6 @@
 import numpy as np
 import dtree as d
+import pandas as pd
 import monkdata as m
 import matplotlib.pyplot as plt
 import random
@@ -67,17 +68,21 @@ def maxRate (treeList,train,val):
 def prunTree(data):
     # All possible partition
     par = [0.3,0.4,0.5,0.6,0.7,0.8]
+    # Used to accumulate the correct rate result
     correctRate = [0,0,0,0,0,0]
     # newRate = []
     # Try every partition and find the best one 
-    for j in range(100):
+    # j = 0
+    result=pd.DataFrame(index=range(0,1000),columns=par)
+
+    for t in range(1000):
         i = 0 
         for p in par:
             monktrain, monkval = partition(data, p)
             TestTr = d.buildTree(monktrain,m.attributes)
             # Get all possibily prunned trees
             pt = d.allPruned(TestTr)
-            print("**************************************************Partition rate", p)
+            # print("******************************Partition rate", p)
             # Go through all the prunned trees
             maxR,maxT = maxRate(pt,monktrain,monkval)
             pt2 = d.allPruned(maxT)
@@ -93,30 +98,34 @@ def prunTree(data):
                     break
             correctRate[i] = correctRate[i]+maxR
             i = i+1
+            # j = j+1
             print(maxR) 
-    newRate = [1-i/100 for i in correctRate]
-    plt.title('Error rates(mean) in all partitions')
-    print(newRate)
-    
-    x = [0.3,0.4,0.5,0.6,0.7,0.8]
-    y = newRate
-    # my_xticks = ['3', '4', '5', '6','7','8']
-    # plt.xticks(newRate, my_xticks)
-    plt.xlim((0,1))
-    plt.plot(x, y,'ro')
-    plt.xlabel('Partitions')
-    plt.ylabel('Error rates')
+            print(t)
+            print(p)
+            result.set_value(t, p, 1-maxR)
+    print(result)
+    result.plot(kind = 'kde', title = '1000 times of different fraction' ,legend=True)
+    plt.ylabel('Density')
+    plt.xlabel('Error')
     plt.show()
 
-    # x = np.array([0,1,2,3])
-    # y = np.array([20,21,22,23])
-    # my_xticks = ['John','Arnold','Mavis','Matt']
-    # plt.xticks(x, my_xticks)
-    # plt.plot(x, y)
+    # newRate = [1-i/1000 for i in correctRate]
+    # plt.title('Error rates(mean) in all partitions')
+    # print(newRate)
+    
+    # x = [0.3,0.4,0.5,0.6,0.7,0.8]
+    # y = newRate
+    # plt.xlim((0,1))
+    # plt.plot(x, y,'ro')
+    # plt.xlabel('Partitions')
+    # plt.ylabel('Error rates')
     # plt.show()
 
 
+# Get the spread meature for the data
+
 def main(argv):
+    # times = [100, 1000]
 #    CalEntropy() 
 #    CalGini()
 #    subEntropy()
