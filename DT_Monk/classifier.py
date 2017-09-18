@@ -1,6 +1,7 @@
 import numpy as np
 import dtree as d
 import monkdata as m
+import matplotlib.pyplot as plt
 import random
 import sys
 
@@ -67,8 +68,9 @@ def prunTree(data):
     # All possible partition
     par = [0.3,0.4,0.5,0.6,0.7,0.8]
     correctRate = [0,0,0,0,0,0]
-    # Try every partition and find the best one
-    for j in range(1000):
+    # newRate = []
+    # Try every partition and find the best one 
+    for j in range(100):
         i = 0 
         for p in par:
             monktrain, monkval = partition(data, p)
@@ -92,14 +94,34 @@ def prunTree(data):
             correctRate[i] = correctRate[i]+maxR
             i = i+1
             print(maxR) 
-    print(correctRate)
+    newRate = [1-i/100 for i in correctRate]
+    plt.title('Error rates(mean) in all partitions')
+    print(newRate)
+    
+    x = [0.3,0.4,0.5,0.6,0.7,0.8]
+    y = newRate
+    # my_xticks = ['3', '4', '5', '6','7','8']
+    # plt.xticks(newRate, my_xticks)
+    plt.xlim((0,1))
+    plt.plot(x, y,'ro')
+    plt.xlabel('Partitions')
+    plt.ylabel('Error rates')
+    plt.show()
+
+    # x = np.array([0,1,2,3])
+    # y = np.array([20,21,22,23])
+    # my_xticks = ['John','Arnold','Mavis','Matt']
+    # plt.xticks(x, my_xticks)
+    # plt.plot(x, y)
+    # plt.show()
+
 
 def main(argv):
 #    CalEntropy() 
 #    CalGini()
 #    subEntropy()
 #    buildT()
-    prunTree(m.monk1)
+    prunTree(m.monk3)
     
 if __name__ == "__main__":
     main(sys.argv)
