@@ -104,7 +104,7 @@ def prunTree(data):
             print(p)
             result.set_value(t, p, 1-maxR)
     print(result)
-    result.plot(kind = 'kde', title = '1000 times of different fraction' ,legend=True)
+    result.plot(kind = 'kde', title = '100 times of different fraction' ,legend=True)
     plt.ylabel('Density')
     plt.xlabel('Error')
     plt.show()
