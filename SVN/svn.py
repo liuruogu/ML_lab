@@ -29,15 +29,6 @@ def random_data():
 
     data = classA + classB
 
-    # for i in range(20):
-    #     # print(data[i])
-    #     if i<10:
-    #         data[i]+(1,);
-    #     if i >10:
-    #         data[i]+(-1,);
-
-    # random. shuffle (data)
-
     # print(classA, classB)
     # print(data)
 
@@ -52,17 +43,6 @@ def random_data():
         # print(data[i][0],data[i][1])
         # print(data[i])
         for j in range(20):
-
-            # Linear kernel, get the scalar product of each points
-            # Build the P matrix
-            # if (i<10 and j<10):
-            #     P[i][j] = linear_kernal(data[i],data[j])
-            # if (i>9 and j>9):
-            #     P[i][j] = linear_kernal(data[i],data[j])
-            # if (i<10 and j>9):
-            #     P[i][j] = -1*linear_kernal(data[i],data[j])
-            # if (i>9 and j<10):
-            #     P[i][j] = -1*linear_kernal(data[i],data[j])
 
             # Polynomial kernel
             P[i][j] = poly_kernal(data[i],data[j])
@@ -99,10 +79,10 @@ def random_data():
     for i in range(len(indexes)):
         print("The data corresponding with the data",data[indexes[i]])
 
-    xrange=np.arange( -4, 4, 0.05)
-    yrange=np.arange( -4, 4, 0.05)
+    xrange=np.arange( -4, 4, 0.5)
+    yrange=np.arange( -4, 4, 0.5)
     grid=matrix([[indicator(x, y, alpha,indexes, data) for y in yrange ] for x in xrange])
-    pylab.contour(xrange, yrange, grid, (-1.0, 0.0, 1.0),color = ('red','black','blue'), linewidths = (1,3,1))
+    pylab.contour(xrange, yrange, grid, (-0.1, 0.0, 0.1),color = ('yellow','yellow','red'), linewidths = (1,3,1))
 
     pylab.show()
 
@@ -111,7 +91,7 @@ def linear_kernal(x,y):
     return np.dot(x,y)
 
 def poly_kernal(x,y):
-    return math.pow(np.dot(x,y),2)
+    return math.pow(np.dot(x,y),1)
 
 def indicator(x,y,alpha,indexes,data ):
     ind = 0;
