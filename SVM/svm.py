@@ -1,20 +1,16 @@
 import numpy as np
-import pandas as pa
 import pylab
 import random
 import math
-# from cvxopt.solvers import qp
-# from cvxopt.base import matrix
 from cvxopt import matrix, solvers
-#
-# Generate the random dataset
-def random_data():
 
-# It will create 10 data points for each class
-#     np.random.seed(100)
-    P = np.zeros((20,20))
-    classA = [(random.normalvariate( 1.5, 1),
-               random.normalvariate(0.5, 1),
+
+def random_data():
+#   It will create 10 data points for each class
+#   np.random.seed(100)
+    P = np.zeros((20, 20))
+    classA = [(random.normalvariate(1.5, 1),
+                random.normalvariate(0.5, 1),
                1.0)
             for i in range(5)] + \
             [(random.normalvariate(1.5, 1),
@@ -23,28 +19,20 @@ def random_data():
             for i in range(5)]
 
     classB = [(random.normalvariate(0.0, 0.5),
-               random. normalvariate( 0.5, 0.5) ,
+               random. normalvariate(0.5, 0.5),
              1.0)
             for i in range(10)]
 
     data = classA + classB
-
-    # print(classA, classB)
-    # print(data)
 
     #Plot two class using blue and red dots
     pylab.hold(True)
     pylab.plot([p[0] for p in classA],[p[1] for p in classA],'bo')
     pylab.plot([p[0] for p in classB],[p[1] for p in classB],'ro')
 
-
+    
     for i in range(20):
-        # Build the P matrix
-        # print(data[i][0],data[i][1])
-        # print(data[i])
         for j in range(20):
-
-            # Polynomial kernel
             P[i][j] = poly_kernal(data[i],data[j])
 
 

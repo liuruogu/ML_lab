@@ -21,6 +21,7 @@ from scipy import misc
 from imp import reload
 from labfuns import *
 import random
+import math
 
 
 # ## Bayes classifier functions to implement
@@ -44,7 +45,8 @@ def computePrior(labels, W=None):
 
     # TODO: compute the values of prior for each class!
     # ==========================
-    
+
+
     # ==========================
 
     return prior
@@ -68,8 +70,48 @@ def mlParams(X, labels, W=None):
 
     # TODO: fill in the code to compute mu and sigma!
     # ==========================
+    # print(mu)
+    # print(mu.shape)
+    print(sigma)
+    print(sigma.shape)
+    # print(X)
+    # print(X.shape)
+    print(labels)
+    # print(labels.shape[0])
+    # Calculate means for each class in each dimension
+    for i in range(Nclasses):
+        indexes = []
+        for index in range(labels.shape[0]):
+            if labels[index] == i:
+                indexes.append(index)
+        # print(indexes)
+        for j in range(labels.shape[0]):
+            x = 0
+            y = 0
+            for index in range(len(indexes)):
+                x = x + X[indexes[index]][0]
+                y = y + X[indexes[index]][1]
+            mu[i][0] = x/len(indexes)
+            mu[i][1] = y/len(indexes)
+
+    # Calculate the covariances of each class
+    for i in range(Nclasses):
+        indexes = []
+        for index in range(labels.shape[0]):
+            if labels[index] == i:
+                indexes.append(index)
+        for j in range(labels.shape[0]):
+            x = 0
+            y = 0
+            for index in range(len(indexes)):
+                x = x + pow((X[indexes[index]][0]-mu[i][0]),2)
+                y = y + pow((X[indexes[index]][1]-mu[i][1]),2)
+            sigma[i][0][0]= x/len(indexes)
+            sigma[i][1][1]= y/len(indexes)
+    print(sigma)
     
     # ==========================
+
 
     return mu, sigma
 
@@ -114,8 +156,8 @@ class BayesClassifier(object):
         return classifyBayes(X, self.prior, self.mu, self.sigma)
 
 
-# ## Test the Maximum Likelihood estimates
-# 
+# Test the Maximum Likelihood estimates
+#
 # Call `genBlobs` and `plotGaussian` to verify your estimates.
 
 
