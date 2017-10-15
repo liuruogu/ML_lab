@@ -42,12 +42,12 @@ def computePrior(labels, W=None):
     Nclasses = np.size(classes)
 
     prior = np.zeros((Nclasses,1))
-
-    # TODO: compute the values of prior for each class!
-    # ==========================
-
-
-    # ==========================
+    for i in range(Nclasses):
+        indexes = []
+        for index in range(labels.shape[0]):
+            if labels[index] == i:
+                indexes.append(index)
+        prior[i] = len(indexes)/labels.shape[0]
 
     return prior
 
@@ -70,14 +70,6 @@ def mlParams(X, labels, W=None):
 
     # TODO: fill in the code to compute mu and sigma!
     # ==========================
-    # print(mu)
-    # print(mu.shape)
-    print(sigma)
-    print(sigma.shape)
-    # print(X)
-    # print(X.shape)
-    print(labels)
-    # print(labels.shape[0])
     # Calculate means for each class in each dimension
     for i in range(Nclasses):
         indexes = []
@@ -108,11 +100,9 @@ def mlParams(X, labels, W=None):
                 y = y + pow((X[indexes[index]][1]-mu[i][1]),2)
             sigma[i][0][0]= x/len(indexes)
             sigma[i][1][1]= y/len(indexes)
-    print(sigma)
-    
+    # print(sigma)
+
     # ==========================
-
-
     return mu, sigma
 
 # in:      X - N x d matrix of M data points
@@ -128,7 +118,14 @@ def classifyBayes(X, prior, mu, sigma):
 
     # TODO: fill in the code to compute the log posterior logProb!
     # ==========================
-    
+    # print(X.shape[0])
+    # inver = np.linalg.inv(sigma)
+
+
+    for i in range(Nclasses):
+        for p in range(X.shape[0]):
+            logProb[i][p] = (-1/2)*np.log(np.linalg.norm(sigma[i]))-(1/2)*np.dot((X[p]-mu[i]),np.linalg.inv(sigma[i])).dot((X[p]-mu[i]).transpose())+prior[i]
+
     # ==========================
     
     # one possible way of finding max a-posteriori once
@@ -155,15 +152,16 @@ class BayesClassifier(object):
     def classify(self, X):
         return classifyBayes(X, self.prior, self.mu, self.sigma)
 
-
 # Test the Maximum Likelihood estimates
 #
 # Call `genBlobs` and `plotGaussian` to verify your estimates.
 
 
 X, labels = genBlobs(centers=5)
+computePrior(labels,None)
 mu, sigma = mlParams(X,labels)
-plotGaussian(X,labels,mu,sigma)
+classifyBayes(X,computePrior(labels,None),mu,sigma)
+# plotGaussian(X,labels,mu,sigma)
 
 
 # Call the `testClassifier` and `plotBoundary` functions for this part.
