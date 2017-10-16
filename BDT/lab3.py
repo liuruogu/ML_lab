@@ -40,8 +40,19 @@ def computePrior(labels, W=None):
         assert(W.shape[0] == Npts)
     classes = np.unique(labels)
     Nclasses = np.size(classes)
-
     prior = np.zeros((Nclasses,1))
+
+    # Compute the prior with weight
+    # for i in range(Nclasses):
+    #     indexes = []
+    #     weight = 0
+    #     for index in range(labels.shape[0]):
+    #         if labels[index] == i:
+    #             indexes.append(index)
+    #     for j in range(len(indexes)):
+    #         weight = weight + W[indexes[j]]
+    #     prior[i] = weight
+
     for i in range(Nclasses):
         indexes = []
         for index in range(labels.shape[0]):
@@ -49,6 +60,7 @@ def computePrior(labels, W=None):
                 indexes.append(index)
         prior[i] = len(indexes)/labels.shape[0]
 
+    # print(prior)
     return prior
 
 # NOTE: you do not need to handle the W argument for this part!
@@ -66,77 +78,71 @@ def mlParams(X, labels, W=None):
         W = np.ones((Npts,1))/float(Npts)
         mu = np.zeros((Nclasses,Ndims))
         sigma = np.zeros((Nclasses,Ndims,Ndims))
-        print(W)
 
     # Calculate means for each class in each dimension with Weight
-    for i in range(Nclasses):
-        indexes = []
-        for index in range(labels.shape[0]):
-            if labels[index] == i:
-                indexes.append(index)
-        # print(indexes)
-        # for j in range(labels.shape[0]):
-        x = 0
-        y = 0
-        for d in range(Ndims):
-            for index in range(len(indexes)):
-                x = x + X[indexes[index]][d]*W[indexes[index]][0]
-                y = y + W[indexes[index]][0]
-            mu[i][d] = x/y
-    print(mu)
-
-    # Calculate the covariances of each class with Weight
-    for i in range(Nclasses):
-        indexes = []
-        for index in range(labels.shape[0]):
-            if labels[index] == i:
-                indexes.append(index)
-        # print(indexes)
-        # for j in range(labels.shape[0]):
-        x = 0
-        y = 0
-        for d in range(Ndims):
-            for index in range(len(indexes)):
-                x = x + pow((X[indexes[index]][d]-mu[i][d]),2)
-                y = y + W[indexes[index]][0]
-            sigma[i][d][d] = x/y
-
-    print(sigma)
-
-
-    # # TODO: fill in the code to compute mu and sigma!
-    # # ==========================
-    # # Calculate means for each class in each dimension
     # for i in range(Nclasses):
     #     indexes = []
     #     for index in range(labels.shape[0]):
     #         if labels[index] == i:
     #             indexes.append(index)
     #     # print(indexes)
-    #     for j in range(labels.shape[0]):
-    #         x = 0
-    #         y = 0
+    #     # for j in range(labels.shape[0]):
+    #     x = 0
+    #     y = 0
+    #     for d in range(Ndims):
     #         for index in range(len(indexes)):
-    #             x = x + X[indexes[index]][0]
-    #             y = y + X[indexes[index]][1]
-    #         mu[i][0] = x/len(indexes)
-    #         mu[i][1] = y/len(indexes)
+    #             x = x + X[indexes[index]][d]*W[indexes[index]][0]
+    #             y = y + W[indexes[index]][0]
+    #         mu[i][d] = x/y
+    # print(mu)
 
-    # Calculate the covariances of each class
+    # Calculate the covariances of each class with Weight
     # for i in range(Nclasses):
     #     indexes = []
     #     for index in range(labels.shape[0]):
     #         if labels[index] == i:
     #             indexes.append(index)
-    #     for j in range(labels.shape[0]):
-    #         x = 0
-    #         y = 0
+    #     # print(indexes)
+    #     x = 0
+    #     y = 0
+    #     for d in range(Ndims):
     #         for index in range(len(indexes)):
-    #             x = x + pow((X[indexes[index]][0]-mu[i][0]),2)
-    #             y = y + pow((X[indexes[index]][1]-mu[i][1]),2)
-    #         sigma[i][0][0]= x/len(indexes)
-    #         sigma[i][1][1]= y/len(indexes)
+    #             x = x + pow((X[indexes[index]][d]-mu[i][d]),2)
+    #             y = y + W[indexes[index]][0]
+    #         sigma[i][d][d] = x/y
+
     # print(sigma)
+
+    print(X.shape)
+    # # TODO: fill in the code to compute mu and sigma!
+    # # ==========================
+    # # Calculate means for each class in each dimension
+    for i in range(Nclasses):
+        indexes = []
+        for index in range(labels.shape[0]):
+            if labels[index] == i:
+                indexes.append(index)
+        # print(indexes)
+        x = 0
+        # y = 0
+        for d in range(Ndims):
+            for index in range(len(indexes)):
+                x = x + X[indexes[index]][d]
+            mu[i][d] = x/len(indexes)
+    print(mu)
+    # Calculate the covariances of each class
+
+    for i in range(Nclasses):
+        indexes = []
+        for index in range(labels.shape[0]):
+            if labels[index] == i:
+                indexes.append(index)
+        x = 0
+        for d in range(Ndims):
+            for index in range(len(indexes)):
+                x = x + pow((X[indexes[index]][d]-mu[i][d]),2)
+            sigma[i][d][d]= x/len(indexes)
+    print(sigma)
 
     # ==========================
     return mu, sigma
@@ -200,17 +206,17 @@ class BayesClassifier(object):
 
 X, labels = genBlobs(centers=5)
 computePrior(labels,None)
-mu, sigma = mlParams(X,labels)
+# mu, sigma = mlParams(X,labels)
 # classifyBayes(X,computePrior(labels,None),mu,sigma)
 
 # plotGaussian(X,labels,mu,sigma)
 
 # Call the `testClassifier` and `plotBoundary` functions for this part.
 #
-# testClassifier(BayesClassifier(), dataset='iris', split=0.7)
+testClassifier(BayesClassifier(), dataset='iris', split=0.7)
 #
 #
-#
+
 # testClassifier(BayesClassifier(), dataset='vowel', split=0.7)
 #
 #
@@ -248,7 +254,8 @@ def trainBoost(base_classifier, X, labels, T=10):
 
         # TODO: Fill in the rest, construct the alphas etc.
         # ==========================
-        
+
+
         # alphas.append(alpha) # you will need to append the new alpha
         # ==========================
         
@@ -272,7 +279,7 @@ def classifyBoost(X, classifiers, alphas, Nclasses):
         # TODO: implement classificiation when we have trained several classifiers!
         # here we can do it by filling in the votes vector with weighted votes
         # ==========================
-        
+
         # ==========================
 
         # one way to compute yPred after accumulating the votes

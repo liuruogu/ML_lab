@@ -79,7 +79,7 @@ def linear_kernal(x,y):
     return np.dot(x,y)
 
 def poly_kernal(x,y):
-    return math.pow(np.dot(x,y),1)
+    return math.pow(np.dot(x,y),2)
 
 def indicator(x,y,alpha,indexes,data ):
     ind = 0;
