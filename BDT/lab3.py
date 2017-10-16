@@ -118,13 +118,18 @@ def classifyBayes(X, prior, mu, sigma):
 
     # TODO: fill in the code to compute the log posterior logProb!
     # ==========================
-    # print(X.shape[0])
-    # inver = np.linalg.inv(sigma)
 
+    inv_sigma = np.zeros((sigma.shape[0],sigma.shape[1],sigma.shape[2]))
 
     for i in range(Nclasses):
+        for j in range(len(sigma[i])):
+            # print(sigma[i][j][j])
+            if sigma[i][j][j]!= 0:
+                inv_sigma[i][j][j] = 1/sigma[i][j][j]
+
+    # np.linalg.inv(sigma[i])
         for p in range(X.shape[0]):
-            logProb[i][p] = (-1/2)*np.log(np.linalg.norm(sigma[i]))-(1/2)*np.dot((X[p]-mu[i]),np.linalg.inv(sigma[i])).dot((X[p]-mu[i]).transpose())+prior[i]
+            logProb[i][p] = (-1/2)*np.log(np.linalg.norm(sigma[i]))-(1/2)*np.dot(np.dot((X[p]-mu[i]),inv_sigma[i]),(X[p]-mu[i]).transpose())+prior[i]
 
     # ==========================
     
@@ -159,23 +164,22 @@ class BayesClassifier(object):
 
 X, labels = genBlobs(centers=5)
 computePrior(labels,None)
-mu, sigma = mlParams(X,labels)
-classifyBayes(X,computePrior(labels,None),mu,sigma)
+# mu, sigma = mlParams(X,labels)
+# classifyBayes(X,computePrior(labels,None),mu,sigma)
+
 # plotGaussian(X,labels,mu,sigma)
 
-
 # Call the `testClassifier` and `plotBoundary` functions for this part.
-
-
-#testClassifier(BayesClassifier(), dataset='iris', split=0.7)
-
-
-
-#testClassifier(BayesClassifier(), dataset='vowel', split=0.7)
-
-
-
-#plotBoundary(BayesClassifier(), dataset='iris',split=0.7)
+#
+# testClassifier(BayesClassifier(), dataset='iris', split=0.7)
+#
+#
+#
+testClassifier(BayesClassifier(), dataset='vowel', split=0.7)
+#
+#
+#
+plotBoundary(BayesClassifier(), dataset='vowel',split=0.7)
 
 
 # ## Boosting functions to implement
