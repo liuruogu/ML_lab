@@ -74,10 +74,7 @@ def mlParams(X, labels, W=None):
     classes = np.unique(labels)
     Nclasses = np.size(classes)
 
-    if W is None:
-        W = np.ones((Npts,1))/float(Npts)
-        mu = np.zeros((Nclasses,Ndims))
-        sigma = np.zeros((Nclasses,Ndims,Ndims))
+
 
     # Calculate means for each class in each dimension with Weight
     # for i in range(Nclasses):
@@ -113,36 +110,51 @@ def mlParams(X, labels, W=None):
 
     # print(sigma)
 
-    print(X.shape)
     # # TODO: fill in the code to compute mu and sigma!
     # # ==========================
     # # Calculate means for each class in each dimension
-    for i in range(Nclasses):
-        indexes = []
-        for index in range(labels.shape[0]):
-            if labels[index] == i:
-                indexes.append(index)
-        # print(indexes)
-        x = 0
-        # y = 0
-        for d in range(Ndims):
-            for index in range(len(indexes)):
-                x = x + X[indexes[index]][d]
-            mu[i][d] = x/len(indexes)
-    print(mu)
-    # Calculate the covariances of each class
 
-    for i in range(Nclasses):
-        indexes = []
-        for index in range(labels.shape[0]):
-            if labels[index] == i:
-                indexes.append(index)
-        x = 0
-        for d in range(Ndims):
-            for index in range(len(indexes)):
-                x = x + pow((X[indexes[index]][d]-mu[i][d]),2)
-            sigma[i][d][d]= x/len(indexes)
-    print(sigma)
+    # for i in range(Nclasses):
+    #     indexes = []
+    #     for index in range(labels.shape[0]):
+    #         if labels[index] == i:
+    #             indexes.append(index)
+    #     # print(indexes)
+    #     x = 0
+    #     # y = 0
+    #     for d in range(Ndims):
+    #         for index in range(len(indexes)):
+    #             x = x + X[indexes[index]][d]
+    #         mu[i][d] = x/len(indexes)
+    # print(mu)
+
+    # Calculate the covariances of each class
+    # for i in range(Nclasses):
+    #     indexes = []
+    #     for index in range(labels.shape[0]):
+    #         if labels[index] == i:
+    #             indexes.append(index)
+    #     x = 0
+    #     for d in range(Ndims):
+    #         for index in range(len(indexes)):
+    #             x = x + pow((X[indexes[index]][d]-mu[i][d]),2)
+    #         sigma[i][d][d]= x/len(indexes)
+    # print(sigma)
+
+    if W is None:
+        W = np.ones((Npts,1))/float(Npts)
+
+    mu = np.zeros((Nclasses,Ndims))
+    sigma = np.zeros((Nclasses,Ndims,Ndims))
+
+    # Compute with the W
+    for jdx, c in enumerate(classes):
+        idx = np.where(labels == c)[0]
+        xlc = X[idx,:]
+        wlc = W[idx,:]
+        mu[jdx] = np.dot(wlc.transpose(),xlc)/np.sum(wlc,axis=0)
+        #sigma[jdx] = np.diag((np.dot(wlc.transpose(),pow(xlc-mu[jdx],2))/np.sum(wlc,axis=0)))
+        sigma[jdx] = np.diag((np.dot(np.transpose(wlc), (xlc - mu[jdx,:])**2) / np.sum(wlc))[0])
 
     # ==========================
     return mu, sigma
@@ -160,18 +172,24 @@ def classifyBayes(X, prior, mu, sigma):
 
     # TODO: fill in the code to compute the log posterior logProb!
     # ==========================
+    for i in range(0, Nclasses):
+        p1=-0.5*np.log(np.linalg.det(sigma[i]))
+        inve = np.diag(1.0 / np.diag(sigma[i]))
+        p2=-0.5*np.diag(np.dot(np.dot((X-mu[i]), inve),np.transpose(X-mu[i])))
+        p3=np.log(prior[i])
+        logProb[i,:] =p1+p2+p3
 
-    inv_sigma = np.zeros((sigma.shape[0],sigma.shape[1],sigma.shape[2]))
-
-    for i in range(Nclasses):
-        for j in range(len(sigma[i])):
-            # print(sigma[i][j][j])
-            if sigma[i][j][j]!= 0:
-                inv_sigma[i][j][j] = 1/sigma[i][j][j]
-
-    # np.linalg.inv(sigma[i])
-        for p in range(X.shape[0]):
-            logProb[i][p] = (-1/2)*np.log(np.linalg.norm(sigma[i]))-(1/2)*np.dot(np.dot((X[p]-mu[i]),inv_sigma[i]),(X[p]-mu[i]).transpose())+prior[i]
+    # inv_sigma = np.zeros((sigma.shape[0],sigma.shape[1],sigma.shape[2]))
+    #
+    # for i in range(Nclasses):
+    #     for j in range(len(sigma[i])):
+    #         # print(sigma[i][j][j])
+    #         if sigma[i][j][j]!= 0:
+    #             inv_sigma[i][j][j] = 1/sigma[i][j][j]
+    #
+    # # np.linalg.inv(sigma[i])
+    #     for p in range(X.shape[0]):
+    #         logProb[i][p] = (-1/2)*np.log(np.linalg.norm(sigma[i]))-(1/2)*np.dot(np.dot((X[p]-mu[i]),inv_sigma[i]),(X[p]-mu[i]).transpose())+np.log(prior[i])
 
     # ==========================
     
@@ -182,7 +200,6 @@ def classifyBayes(X, prior, mu, sigma):
 
 
 # The implemented functions can now be summarized into the `BayesClassifier` class, which we will use later to test the classifier, no need to add anything else here:
-
 
 # NOTE: no need to touch this
 class BayesClassifier(object):
@@ -204,19 +221,17 @@ class BayesClassifier(object):
 # Call `genBlobs` and `plotGaussian` to verify your estimates.
 
 
-X, labels = genBlobs(centers=5)
+X,labels = genBlobs(centers=5)
 computePrior(labels,None)
-# mu, sigma = mlParams(X,labels)
-# classifyBayes(X,computePrior(labels,None),mu,sigma)
-
+mu, sigma = mlParams(X,labels)
+classifyBayes(X,computePrior(labels,None),mu,sigma)
 # plotGaussian(X,labels,mu,sigma)
 
 # Call the `testClassifier` and `plotBoundary` functions for this part.
 #
-testClassifier(BayesClassifier(), dataset='iris', split=0.7)
+# testClassifier(BayesClassifier(), dataset='iris', split=0.7)
 #
 #
-
 # testClassifier(BayesClassifier(), dataset='vowel', split=0.7)
 #
 #
@@ -249,14 +264,28 @@ def trainBoost(base_classifier, X, labels, T=10):
         # a new classifier can be trained like this, given the current weights
         classifiers.append(base_classifier.trainClassifier(X, labels, wCur))
 
-        # do classification for each point
+        # do classification for each point by the newest classifier
         vote = classifiers[-1].classify(X)
+        result = np.zeros([Npts, 1])
+        newWeight = np.zeros([Npts, 1])
 
         # TODO: Fill in the rest, construct the alphas etc.
         # ==========================
-
-
         # alphas.append(alpha) # you will need to append the new alpha
+
+        for i in range(0, Npts):
+            if vote[i] == labels[i]:
+                result[i] = 1
+        theta = np.dot(wCur.transpose(), 1-result)
+        alpha = 0.5*(np.log(1-theta)-np.log(theta))
+        alphas.append(alpha)
+        for j in range(0, Npts):
+            if vote[j] == labels[j]:
+                newWeight[j] = np.exp(-alpha)
+            else:
+                newWeight[j] = np.exp(alpha)
+        # Update the weight in each iteration
+        wCur = (wCur*newWeight)/np.sum(wCur*newWeight)
         # ==========================
         
     return classifiers, alphas
@@ -279,7 +308,10 @@ def classifyBoost(X, classifiers, alphas, Nclasses):
         # TODO: implement classificiation when we have trained several classifiers!
         # here we can do it by filling in the votes vector with weighted votes
         # ==========================
-
+        for i in range(0, Ncomps):
+            vote = classifiers[i].classify(X)
+            for j in range(0, Npts):
+                votes[j,vote[j]] += alphas[i]
         # ==========================
 
         # one way to compute yPred after accumulating the votes
@@ -312,41 +344,40 @@ class BoostClassifier(object):
 # Call the `testClassifier` and `plotBoundary` functions for this part.
 
 
-#testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='iris',split=0.7)
+# testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='iris',split=0.7)
 
 
 
-#testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='vowel',split=0.7)
+# testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='vowel',split=0.7)
 
 
 
-#plotBoundary(BoostClassifier(BayesClassifier()), dataset='iris',split=0.7)
+# plotBoundary(BoostClassifier(BayesClassifier()), dataset='vowel',split=0.7)
 
 
 # Now repeat the steps with a decision tree classifier.
 
 
-#testClassifier(DecisionTreeClassifier(), dataset='iris', split=0.7)
+# testClassifier(DecisionTreeClassifier(), dataset='iris', split=0.7)
 
 
 
-#testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='iris',split=0.7)
+# testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='iris',split=0.7)
+#
+
+
+# testClassifier(DecisionTreeClassifier(), dataset='vowel',split=0.7)
 
 
 
-#testClassifier(DecisionTreeClassifier(), dataset='vowel',split=0.7)
+# testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='vowel',split=0.7)
 
 
 
-#testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='vowel',split=0.7)
+# plotBoundary(DecisionTreeClassifier(), dataset='vowel',split=0.7)
 
 
-
-#plotBoundary(DecisionTreeClassifier(), dataset='iris',split=0.7)
-
-
-
-#plotBoundary(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='iris',split=0.7)
+plotBoundary(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='vowel',split=0.7)
 
 
 # ## Bonus: Visualize faces classified using boosted decision trees
